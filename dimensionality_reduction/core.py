@@ -78,6 +78,7 @@ def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
     x = pd.DataFrame(ss.fit_transform(df), index=df.index, columns=df.columns)
 
     while True:
+        print(x)
         x = add_constant(x)
         vif = pd.DataFrame()
         vif.index = x.columns
