@@ -4,6 +4,7 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 from statsmodels.tools.tools import add_constant
 from scipy import stats as scistats
 from sklearn.preprocessing import StandardScaler
+import typing
 
 def PreCutoff(df: pd.DataFrame)->pd.DataFrame:
     """十分に分散していない説明変数を切り捨てる
@@ -107,7 +108,7 @@ def codes4p(p_value:float)->str:
     else: codes = '***'
     return codes
 
-def F_test(a:pd.Series,b:pd.Series)->Tuple[float,float,str]:
+def F_test(a:pd.Series,b:pd.Series)->typing.Tuple[float,float,str]:
     """F検定
 
     Args:
@@ -167,6 +168,3 @@ def BasedBySignificance(df:pd.DataFrame, target_names=[1,-1], y=-1)->pd.DataFram
         if p > 0.05:
             features = features.drop(columns=v, axis=1)
     return features
-
-
-
