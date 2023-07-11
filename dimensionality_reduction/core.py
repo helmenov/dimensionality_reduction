@@ -83,9 +83,10 @@ def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
         vif.index = x.columns
         df_vif = x[vif.index].copy()
         vif["VIF Factor"] = [variance_inflation_factor(df_vif.values, i) for i in range(df_vif.shape[1])]
-        display(vif)
         vif = vif.drop('const',axis=0)
-        if vif["VIF Factor"].max(axis=0) > vif_threshold:  # すべてのVIFがしきい値を下回るまで列を除去
+        vif_max = vif["VIF Factor"].max(axis=0)
+        print(f'{vif_max=}')
+        if vif_max > vif_threshold:  # すべてのVIFがしきい値を下回るまで列を除去
             vif = vif.drop(vif["VIF Factor"].idxmax(axis=0), axis=0)
             x = df_vif[vif.index].copy()
         else:
