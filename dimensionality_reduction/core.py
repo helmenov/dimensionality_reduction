@@ -83,7 +83,17 @@ def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
         vif = pd.DataFrame()
         vif.index = x.columns
         df_vif = x[vif.index].copy()
-        vif["VIF Factor"] = [variance_inflation_factor(df_vif.values, i) for i in range(df_vif.shape[1])]
+        #vif["VIF Factor"] = [variance_inflation_factor(df_vif.values, i) for i in range(df_vif.shape[1])]
+        for i in range(df_vif.shape[1]):
+            try:
+                vif_i = variance_inflation_factor(df_vif.values,i)
+            except:
+                print(f'{vif.index[i]} is huge vif')
+                vif_i = 1e+7
+            finally:
+                vif["VIF Factor"][i] = vif_i
+
+
         vif = vif.drop('const',axis=0)
         vif_max = vif["VIF Factor"].max(axis=0)
         print(f'{vif_max=}')
