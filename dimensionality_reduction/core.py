@@ -86,6 +86,7 @@ def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
         #vif["VIF Factor"] = [variance_inflation_factor(df_vif.values, i) for i in range(df_vif.shape[1])]
         vif_ = list()
         for i in range(df_vif.shape[1]):
+            print(f'\r{i}')
             try:
                 vif_i = variance_inflation_factor(df_vif.values,i)
             except RuntimeWarning: # `python -W error foo.py` catch
@@ -170,14 +171,24 @@ def BasedBySignificance(df:pd.DataFrame, target_names=[1,-1], y=-1)->pd.DataFram
         a = features[target==target_names[0]][v]
         b = features[target==target_names[1]][v]
         # a,bそれぞれの正規性(shapiro)
-        assert scistats.shapiro(a).pvalue > 0.05
-        assert scistats.shapiro(b).pvalue > 0.05
-        # a,bの等分散性
-        _,p_value,_ = ftest(a,b)
-        if p_value > 0.05:
-            p = scistats.ttest_ind(a,b,equal_var=True).pvalue
-        else:
-            p = scistats.ttest_ind(a,b,equal_var=False).pvalue
+        if scistats.shapiro(a).pvalue > 0.05 and scistats.shapiro(b).pvalue > 0.05:
+            # a,bの等分散性
+            _,p_value,_ = F_test(a,b)
+            if p_value > 0.05: # Student-t
+                p = scistats.ttest_ind(a,b,equal_var=True).pvalue
+            else: # Welch-t
+                p = scistats.ttest_ind(a,b,equal_var=False).pvalue
+        else: #
+            # a,bの等分散性
+            _,p_value,_ = F_test(a,b)
+            if p_value > 0.05:
+                # Mann-Whitney-U
+                # H0: a,bのヒストグラムの形が同じである(P(a)==P(b))
+                p = scistats.mannwhitneyu(a,b).pvalue
+            else:
+                # Brunner-Munzel-W
+                # H0: a,bから一つずつ値を取り出したとき、P(a>b)==P(b>a)
+                p = scistats.brunnermunzel(a,b).pvalue
         if p > 0.05:
             features = features.drop(columns=v, axis=1)
     return features
