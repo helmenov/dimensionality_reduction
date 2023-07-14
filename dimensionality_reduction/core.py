@@ -93,7 +93,8 @@ def BasedByVIF_(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
             print(f'={vif_i}')
             vif_.append(vif_i)
         vif["VIF Factor"] = vif_
-
+        vif_max = vif["VIF Factor"].max(axis=0)
+        vif[vif["VIF Factor"].idxmax(axis=0)]
         vif = vif.drop('const',axis=0)
         if vif_max > vif_threshold:  # すべてのVIFがしきい値を下回るまで列を除去
             column_max = vif["VIF Factor"].idxmax(axis=0)
@@ -122,6 +123,7 @@ def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
         vif.index = x.columns
         df_vif = x[vif.index].copy()
         vif["VIF Factor"] = vif_diag_inv_corr(df_vif)
+        vif_max = vif["VIF Factor"].max(axis=0)
         vif[vif["VIF Factor"].idxmax(axis=0)]
         if vif_max > vif_threshold:  # すべてのVIFがしきい値を下回るまで列を除去
             column_max = vif["VIF Factor"].idxmax(axis=0)
