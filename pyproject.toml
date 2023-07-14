@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dimensionality_reduction"
-version = "0.2.11"
+version = "0.2.12"
 description = "Dimensionality Reduction without Multicolinearity"
 authors = ["Kotaro SONODA <kotaro1976@gmail.com>"]
 readme = "README.md"

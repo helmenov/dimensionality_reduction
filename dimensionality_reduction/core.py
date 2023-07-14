@@ -97,7 +97,7 @@ def BasedByVIF_(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
         vif = vif.drop('const',axis=0)
         if vif_max > vif_threshold:  # すべてのVIFがしきい値を下回るまで列を除去
             column_max = vif["VIF Factor"].idxmax(axis=0)
-            print(f'{clumn_max} has collineary')
+            print(f'{column_max} has collineary')
             vif = vif.drop(column_max, axis=0)
             x = df_vif[vif.index].copy()
         else:
@@ -125,7 +125,7 @@ def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
         vif_max = vif["VIF Factor"].max(axis=0)
         if vif_max > vif_threshold:  # すべてのVIFがしきい値を下回るまで列を除去
             column_max = vif["VIF Factor"].idxmax(axis=0)
-            print(f'{clumn_max} has collineary')
+            print(f'{column_max} has collineary')
             vif = vif.drop(column_max, axis=0)
             x = df_vif[vif.index].copy()
         else:
