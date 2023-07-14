@@ -78,7 +78,6 @@ def BasedByVIF_(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
     x = pd.DataFrame(ss.fit_transform(df), index=df.index, columns=df.columns)
 
     while True:
-        print(x)
         x = add_constant(x)
         vif = pd.DataFrame()
         vif.index = x.columns
@@ -86,21 +85,20 @@ def BasedByVIF_(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
         #vif["VIF Factor"] = [variance_inflation_factor(df_vif.values, i) for i in range(df_vif.shape[1])]
         vif_ = list()
         for i in range(df_vif.shape[1]):
-            print(f'\r{i}')
+            print(f'{vif.index[i]}',end='')
             try:
                 vif_i = variance_inflation_factor(df_vif.values,i)
             except RuntimeWarning: # `python -W error foo.py` catch
-                print(f'{vif.index[i]} is huge vif')
                 vif_i = 1e+7
-            finally:
-                vif_.append(vif_i)
+            print(f'={vif_i}')
+            vif_.append(vif_i)
         vif["VIF Factor"] = vif_
 
         vif = vif.drop('const',axis=0)
-        vif_max = vif["VIF Factor"].max(axis=0)
-        print(f'{vif_max=}')
         if vif_max > vif_threshold:  # すべてのVIFがしきい値を下回るまで列を除去
-            vif = vif.drop(vif["VIF Factor"].idxmax(axis=0), axis=0)
+            column_max = vif["VIF Factor"].idxmax(axis=0)
+            print(f'{clumn_max} has collineary')
+            vif = vif.drop(column_max, axis=0)
             x = df_vif[vif.index].copy()
         else:
             break
@@ -120,16 +118,15 @@ def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
     x = pd.DataFrame(ss.fit_transform(df), index=df.index, columns=df.columns)
 
     while True:
-        print(x)
         vif = pd.DataFrame()
         vif.index = x.columns
         df_vif = x[vif.index].copy()
-        #vif["VIF Factor"] = [variance_inflation_factor(df_vif.values, i) for i in range(df_vif.shape[1])]
         vif["VIF Factor"] = vif_diag_inv_corr(df_vif)
-        vif_max = vif["VIF Factor"].max(axis=0)
-        print(f'{vif_max=}')
+        vif[vif["VIF Factor"].idxmax(axis=0)]
         if vif_max > vif_threshold:  # すべてのVIFがしきい値を下回るまで列を除去
-            vif = vif.drop(vif["VIF Factor"].idxmax(axis=0), axis=0)
+            column_max = vif["VIF Factor"].idxmax(axis=0)
+            print(f'{clumn_max} has collineary')
+            vif = vif.drop(column_max, axis=0)
             x = df_vif[vif.index].copy()
         else:
             break
@@ -203,6 +200,7 @@ def BasedBySignificance(df:pd.DataFrame, target_names=[1,-1], y=-1)->pd.DataFram
     for v in features.columns:
         a = features[target==target_names[0]][v]
         b = features[target==target_names[1]][v]
+        print(a.shape,b.shape)
         # a,bそれぞれの正規性(shapiro)
         if scistats.shapiro(a).pvalue > 0.05 and scistats.shapiro(b).pvalue > 0.05:
             # a,bの等分散性
