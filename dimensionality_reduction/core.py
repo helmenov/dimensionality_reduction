@@ -64,7 +64,7 @@ def BasedByCorr(df: pd.DataFrame, corr_threshold=0.9) -> pd.DataFrame:
     return df_corr
 
 
-def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
+def BasedByVIF_(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
     """VIF(Variation Inflation Factor)の大きい説明変数を1つずつ取り除く
 
     Args:
@@ -105,6 +105,39 @@ def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
         else:
             break
     return df[vif.index].copy()
+
+def BasedByVIF(df: pd.DataFrame, vif_threshold=10) -> pd.DataFrame:
+    """VIF(Variation Inflation Factor)の大きい説明変数を1つずつ取り除く
+
+    Args:
+        df (pd.DataFrame): 説明変数
+        vif_threshold (int, optional): VIFしきい値. Defaults to 10.
+
+    Returns:
+        pd.DataFrame: カット済み説明変数
+    """
+    ss = StandardScaler()
+    x = pd.DataFrame(ss.fit_transform(df), index=df.index, columns=df.columns)
+
+    while True:
+        print(x)
+        vif = pd.DataFrame()
+        vif.index = x.columns
+        df_vif = x[vif.index].copy()
+        #vif["VIF Factor"] = [variance_inflation_factor(df_vif.values, i) for i in range(df_vif.shape[1])]
+        vif["VIF Factor"] = vif_diag_inv_corr(df_vif)
+        vif_max = vif["VIF Factor"].max(axis=0)
+        print(f'{vif_max=}')
+        if vif_max > vif_threshold:  # すべてのVIFがしきい値を下回るまで列を除去
+            vif = vif.drop(vif["VIF Factor"].idxmax(axis=0), axis=0)
+            x = df_vif[vif.index].copy()
+        else:
+            break
+    return df[vif.index].copy()
+
+def vif_diag_inv_corr(df:pd.DataFrame):
+    diag_inv_corr = np.diag(np.linalg.inv(df.corr().to_numpy()))
+    return pd.Series(diag_inv_corr,index=df.columns)
 
 def codes4p(p_value:float)->str:
     """evaluated codes by p_value
